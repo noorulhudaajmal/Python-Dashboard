@@ -2,7 +2,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import pycountry
 import plotly.express as px
-import plotly.figure_factory as ff
 from matplotlib import pyplot as plt
 from plotly.subplots import make_subplots
 from wordcloud import WordCloud

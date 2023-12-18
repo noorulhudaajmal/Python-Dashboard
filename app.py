@@ -108,6 +108,10 @@ if menu == "League Tables":
     row_2[0].plotly_chart(investors_table(df, col, num), use_container_width=True)
     row_2[1].pyplot(investors_wordcloud(df, col, num), use_container_width=True)
 
+
+# if menu == "Ventilation":
+#     # code here
+
 if menu == "Historical Values":
     metrics_row = st.columns(3)
     dfm = df.copy()
