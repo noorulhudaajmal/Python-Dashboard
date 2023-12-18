@@ -4,7 +4,7 @@ from streamlit_option_menu import option_menu
 
 from utils import kpi_card, product_by_business_lines, rwa_by_products, fees_overtime, \
     signing_to_settlement, map_plot, top_investors, investors_table, preprocess_data, investors_wordcloud, \
-    metrics_dist_chart, measure_distribution, time_series_trend
+    metrics_dist_chart, measure_distribution, time_series_trend, ventilation_table
 
 # ------------------------------ Page Configuration------------------------------
 st.set_page_config(page_title="Data Insights", page_icon="📊", layout="wide")
@@ -39,6 +39,8 @@ with st.sidebar:
     product_line = st.multiselect(label="Product Line", options=data["Product Line"].unique(), placeholder="All")
     product_name = st.multiselect(label="Product", options=data["Product Name"].unique(), placeholder="All")
     currency = st.multiselect(label="Currency", options=data["Currency"].unique(), placeholder="All")
+    region = st.multiselect(label="Region", options=data["Region"].unique(), placeholder="All")
+
 
 # ----------------------------- Data Filtering -----------------------------------
 
@@ -52,6 +54,8 @@ if product_name:
     df = df[df["Product Name"].isin(product_name)]
 if currency:
     df = df[df["Currency"].isin(currency)]
+if region:
+    df = df[df["Region"].isin(region)]
 
 # ----------------------------------- Menu --------------------------------------
 menu = option_menu(menu_title=None, menu_icon=None, orientation="horizontal",
@@ -108,31 +112,62 @@ if menu == "League Tables":
     row_2[0].plotly_chart(investors_table(df, col, num), use_container_width=True)
     row_2[1].pyplot(investors_wordcloud(df, col, num), use_container_width=True)
 
+if menu == "Ventilation":
+    # List of possible dimensions for filtering
+    dimensions = ['Year', 'Business Line', 'Product Line', 'Region',
+                  'Investor', 'Product Name', 'Deal Name', 'Rating']
 
-# if menu == "Ventilation":
-#     # code here
+    st.write("### Filters")
+    checks = st.columns(7)
+    date = checks[0].checkbox(label="Signing Date")
+    business = checks[1].checkbox(label="Business Line")
+    product = checks[2].checkbox(label="Product Line")
+    region = checks[3].checkbox(label="Region")
+    investor = checks[4].checkbox(label="Investor Name")
+    deal = checks[5].checkbox(label="Deal Name")
+    prod_name = checks[6].checkbox(label="Product Name")
+
+    dims = []
+    if date:
+        dims.append("Signing Date")
+    if business:
+        dims.append("Business Line")
+    if product:
+        dims.append("Product Line")
+    if region:
+        dims.append("Region")
+    if investor:
+        dims.append("Investor Name")
+    if deal:
+        dims.append("Deal Name")
+    if prod_name:
+        dims.append("Product Name")
+
+    st.write("### Results")
+    result_df = df[dims]
+
+    st.plotly_chart(ventilation_table(result_df), use_container_width=True)
+
 
 if menu == "Historical Values":
-    metrics_row = st.columns(3)
+    metrics_row = st.columns((1,2,1))
     dfm = df.copy()
     dfm['Signing Date'] = pd.to_datetime(dfm['Signing Date']).dt.date
     dfm = dfm.dropna(subset=['Signing Date'])
 
     # Slider for period selection
-    start_date, end_date = metrics_row[0].slider(
+    start_date, end_date = metrics_row[1].slider(
         "Select the period",
         value=(dfm['Signing Date'].min(), dfm['Signing Date'].max()),
         format="MM/DD/YYYY"
     )
-    selected_metrics = metrics_row[1].multiselect(
+    metrics_row_1 = st.columns(2)
+    selected_metrics = metrics_row_1[0].multiselect(
         "Select metrics to display",
         options=['Gross Margin', 'Product Volume', 'Eva', 'Net Margin', 'Upfront Fees'],
         default=['Gross Margin', 'Net Margin']
     )
-    # start_date = pd.to_datetime(start_date)
-    # end_date
-
-    selected_products = metrics_row[2].multiselect(
+    selected_products = metrics_row_1[1].multiselect(
         "Select products to display",
         options=df['Product Name'].unique(),
         default=df['Product Name'].unique()

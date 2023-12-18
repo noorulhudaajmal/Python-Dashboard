@@ -267,3 +267,24 @@ def time_series_trend(df, metrics):
     fig = update_hover_layout(fig)
     fig.update_layout(xaxis_title = "Signing Date", yaxis_title="Metric Value")
     return fig
+
+
+def ventilation_table(df):
+    fig = go.Figure(data=[go.Table(
+        header=dict(
+            values=list(df.columns),
+            font=dict(size=20, color='white', family='ubuntu'),
+            fill_color='#264653',
+            align=['left', 'center'],
+            height=60
+        ),
+        cells=dict(
+            values=[df[K].tolist() for K in df.columns],
+            font=dict(size=16, color="black", family='ubuntu'),
+            fill_color='#f5ebe0',
+            height=40
+        ))]
+    )
+    fig.update_layout(margin=dict(l=0, r=10, b=10, t=30))
+
+    return fig
